@@ -1,0 +1,37 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "rotation": 0.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "1m straight"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "armSetAngle60"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "1m left"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

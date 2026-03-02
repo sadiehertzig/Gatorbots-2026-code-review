@@ -1,0 +1,90 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems;
+
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.SparkFlex;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import static frc.robot.Constants.FuelConstants.*;
+
+public class CANFuelSubsystem extends SubsystemBase {
+  private final SparkFlex feederRoller;
+  private final SparkFlex intakeLauncherRoller;
+
+  /** Creates a new CANBallSubsystem. */
+  public CANFuelSubsystem() {
+    // create brushed motors for each of the motors on the launcher mechanism
+    intakeLauncherRoller = new SparkFlex(INTAKE_LAUNCHER_MOTOR_ID, MotorType.kBrushless);
+    feederRoller = new SparkFlex(FEEDER_MOTOR_ID, MotorType.kBrushless);
+
+    // create the configuration for the feeder roller, set a current limit and apply
+    // the config to the controller
+    SparkFlexConfig feederConfig = new SparkFlexConfig();
+    feederConfig.smartCurrentLimit(FEEDER_MOTOR_CURRENT_LIMIT);
+    feederRoller.configure(feederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    // Wait thIS SADIE DONT FORGET guys it says to change the kresetsafe parameters BECAUSE ITS DEPRECATED AND MIGHT GET REMOVED IN FUTURE UPDATES, BUT IM TOO SCARED TO MESS ANYTHING UP SO WHEN YOU GUYS GET HERE LETS LOOK THIS OVER
+    // create the configuration for the launcher roller, set a current limit, set
+    // the motor to inverted so that positive values are used for both intaking and
+    // launching, and apply the config to the controller
+    SparkFlexConfig launcherConfig = new SparkFlexConfig();
+    launcherConfig.inverted(true);
+    launcherConfig.smartCurrentLimit(LAUNCHER_MOTOR_CURRENT_LIMIT);
+    intakeLauncherRoller.configure(launcherConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    // put default values for various fuel operations onto the dashboard
+    // all commands using this subsystem pull values from the dashbaord to allow
+    // you to tune the values easily, and then replace the values in Constants.java
+    // with your new values. For more information, see the Software Guide.
+    SmartDashboard.putNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE);
+    SmartDashboard.putNumber("Intaking intake roller value", INTAKING_INTAKE_VOLTAGE);
+    SmartDashboard.putNumber("Launching feeder roller value", LAUNCHING_FEEDER_VOLTAGE);
+    SmartDashboard.putNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE);
+    SmartDashboard.putNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE);
+  }
+
+  // A method to set the voltage of the intake roller
+  public void setIntakeLauncherRoller(double voltage) {
+    intakeLauncherRoller.setVoltage(voltage);
+  }
+
+  // A method to set the voltage of the intake roller
+  public void setFeederRoller(double voltage) {
+    feederRoller.setVoltage(voltage);
+  }
+
+  // A method to stop the rollers
+  public void stop() {
+    feederRoller.setVoltage(0);
+    intakeLauncherRoller.setVoltage(0);
+  }
+
+  // Command to run intake (pull game piece in)
+  public Command intake() {
+    return this.run(() -> {
+      setFeederRoller(INTAKING_FEEDER_VOLTAGE);
+      setIntakeLauncherRoller(INTAKING_INTAKE_VOLTAGE);
+    }).finallyDo(() -> stop());
+  }
+
+  // Command to launch (feed game piece to shooter)
+  public Command launch() {
+    return this.run(() -> {
+      setFeederRoller(LAUNCHING_FEEDER_VOLTAGE);
+      setIntakeLauncherRoller(LAUNCHING_LAUNCHER_VOLTAGE);
+    }).finallyDo(() -> stop());
+  }
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+  }
+}
